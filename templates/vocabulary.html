@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" class="card add-form">
+  <label>Character, word or expression
+    <input type="text" name="text" required placeholder="e.g. 朋友">
+  </label>
+  <label><span>Pinyin <span class="optional">(optional)</span></span>
+    <input type="text" name="pinyin" placeholder="péngyou">
+  </label>
+  <label><span>Meaning <span class="optional">(optional)</span></span>
+    <input type="text" name="meaning" placeholder="friend">
+  </label>
+  <button type="submit">Add</button>
+</form>
+
+{% if message %}
+  <p class="notice">{{ message }}</p>
+{% endif %}
+
+<section class="card">
+  <h2>Known characters</h2>
+  <p class="char-grid">{{ chars }}</p>
+</section>
+
+<section class="card">
+  <h2>Words and expressions ({{ entries|length }})</h2>
+  <form method="post">
+    <ul class="entries">
+      {% for e in entries %}
+        <li>
+          <span class="entry-text">{{ e.text }}</span>
+          {% if e.pinyin %}<span class="entry-pinyin">{{ e.pinyin }}</span>{% endif %}
+          {% if e.meaning %}<span class="entry-meaning">{{ e.meaning }}</span>{% endif %}
+          <button type="submit" name="delete" value="{{ e.text }}" class="delete" title="Remove {{ e.text }}">×</button>
+        </li>
+      {% endfor %}
+    </ul>
+  </form>
+</section>
+{% endblock %}

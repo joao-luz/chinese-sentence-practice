@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments (the app's and vLLM's)
+.venv/
+.venv-vllm/
+
+# Secrets and per-machine settings (data/settings.json holds the API key)
+.env
+data/settings.json
+
+# Tatoeba downloads and the corpus built from them (recreate with build_tatoeba.py)
+data/tatoeba/
+
+# Local Claude Code settings
+.claude/settings.local.json
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+.DS_Store

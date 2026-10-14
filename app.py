@@ -1,0 +1,156 @@
+"""Chinese sentence learner: shows English sentences whose Chinese
+translation only uses characters the learner already knows."""
+
+import json
+from pathlib import Path
+
+from flask import Flask, redirect, render_template, request, url_for
+
+from common import HAN, GenerationError, known_characters
+from sources import SOURCES, claude_api, local_llm, tatoeba
+
+BASE_DIR = Path(__file__).parent
+VOCAB_FILE = BASE_DIR / "data" / "vocab.json"
+SETTINGS_FILE = BASE_DIR / "data" / "settings.json"
+
+app = Flask(__name__)
+
+
+# ---------- storage ----------
+
+def load_json(path, default):
+    if not path.exists():
+        return default
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def save_json(path, data):
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def load_vocab():
+    return load_json(VOCAB_FILE, [])
+
+
+def load_settings():
+    defaults = {"api_key": "", "source": "tatoeba", "local_url": local_llm.DEFAULT_URL, "local_model": ""}
+    return {**defaults, **load_json(SETTINGS_FILE, {})}
+
+
+def save_settings(settings):
+    save_json(SETTINGS_FILE, settings)
+    SETTINGS_FILE.chmod(0o600)  # the file holds the API key
+
+
+def mask(key):
+    return f"{key[:7]}…{key[-4:]}" if len(key) > 12 else "••••"
+
+
+# ---------- routes ----------
+
+@app.route("/")
+def index():
+    return redirect(url_for("generate"))
+
+
+@app.route("/generate", methods=["GET", "POST"])
+def generate():
+    entries = load_vocab()
+    settings = load_settings()
+    result = error = None
+    theme = ""
+    source = settings["source"]
+    if request.method == "POST":
+        source = request.form.get("source", source)
+        if source not in SOURCES:
+            source = "tatoeba"
+        theme = request.form.get("theme", "").strip()
+        if source != settings["source"]:
+            settings["source"] = source
+            save_settings(settings)
+        try:
+            if source == "claude":
+                result = claude_api.generate(entries, theme, settings["api_key"])
+            elif source == "local":
+                result = local_llm.generate(
+                    entries, theme, settings["local_url"], settings["local_model"]
+                )
+            else:
+                last_id = request.form.get("last_id", type=int)
+                result = tatoeba.generate(entries, exclude_id=last_id)
+        except GenerationError as e:
+            error = str(e)
+    return render_template(
+        "generate.html", tab="generate", result=result, error=error,
+        theme=theme, source=source, sources=SOURCES,
+        char_count=len(known_characters(entries)),
+    )
+
+
+@app.route("/vocabulary", methods=["GET", "POST"])
+def vocabulary():
+    entries = load_vocab()
+    message = None
+    if request.method == "POST":
+        if "delete" in request.form:
+            text = request.form["delete"]
+            entries = [e for e in entries if e["text"] != text]
+            save_json(VOCAB_FILE, entries)
+            message = f"Removed {text}."
+        else:
+            text = request.form.get("text", "").strip()
+            if not HAN.search(text):
+                message = "Entries must contain at least one Chinese character."
+            elif any(e["text"] == text for e in entries):
+                message = f"{text} is already in your list."
+            else:
+                before = known_characters(entries)
+                entries.append({
+                    "text": text,
+                    "pinyin": request.form.get("pinyin", "").strip(),
+                    "meaning": request.form.get("meaning", "").strip(),
+                })
+                save_json(VOCAB_FILE, entries)
+                new = "".join(c for c in known_characters(entries) if c not in before)
+                message = f"Added {text}." + (f" New characters: {new}" if new else "")
+    chars = known_characters(entries)
+    return render_template(
+        "vocabulary.html", tab="vocabulary", entries=entries,
+        chars="".join(chars), char_count=len(chars), message=message,
+    )
+
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings_page():
+    settings = load_settings()
+    message = None
+    if request.method == "POST":
+        if "local_url" in request.form:
+            settings["local_url"] = request.form["local_url"].strip() or local_llm.DEFAULT_URL
+            settings["local_model"] = request.form.get("local_model", "").strip()
+            message = "Local model settings saved."
+        elif "remove_key" in request.form:
+            settings["api_key"] = ""
+            message = "API key removed."
+        else:
+            key = request.form.get("api_key", "").strip()
+            if not key:
+                message = "Paste a key to save it."
+            elif not key.startswith("sk-ant-"):
+                message = "That doesn't look like a Claude API key (they start with sk-ant-)."
+            else:
+                settings["api_key"] = key
+                message = "API key saved."
+        save_settings(settings)
+    key = settings["api_key"]
+    return render_template(
+        "settings.html", tab="settings", message=message,
+        masked_key=mask(key) if key else None,
+        local_url=settings["local_url"], local_model=settings["local_model"],
+        char_count=len(known_characters(load_vocab())),
+    )
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

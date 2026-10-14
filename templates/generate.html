@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" class="card generate-form">
+  <fieldset class="sources">
+    <legend>Source</legend>
+    {% for key, label in sources.items() %}
+      <label class="source-option">
+        <input type="radio" name="source" value="{{ key }}" id="src-{{ key }}" {{ 'checked' if key == source }}>
+        {{ label }}
+      </label>
+    {% endfor %}
+  </fieldset>
+  <div class="row">
+    <input type="text" name="theme" value="{{ theme }}" class="theme-field"
+           placeholder="Optional theme, e.g. family, work, meeting someone">
+    {% if result and result.id %}<input type="hidden" name="last_id" value="{{ result.id }}">{% endif %}
+    <button type="submit">New sentence</button>
+  </div>
+</form>
+
+{% if error %}
+  <p class="notice error">{{ error }}</p>
+{% endif %}
+
+{% if result %}
+  <section class="card">
+    <p class="label">Translate into Chinese:</p>
+    <p class="english">{{ result.english }}</p>
+    <details>
+      <summary>Show answer</summary>
+      <p class="chinese">{{ result.chinese }}</p>
+      {% if result.pinyin %}<p class="pinyin">{{ result.pinyin }}</p>{% endif %}
+      {% if result.other_english %}
+        <p class="also">Also translated as: {{ result.other_english|join(" / ") }}</p>
+      {% endif %}
+    </details>
+    {% if result.note %}<p class="credit">{{ result.note }}</p>{% endif %}
+    {% if result.credit_url %}
+      <p class="credit">
+        <a href="{{ result.credit_url }}" target="_blank" rel="noopener">{{ result.credit_label }}</a>
+        {% if result.pool_size %} · {{ result.pool_size }} sentences match your characters{% endif %}
+      </p>
+    {% endif %}
+  </section>
+{% elif not error %}
+  <p class="hint">Press <strong>New sentence</strong> to get an English sentence you can translate using only the characters you know.</p>
+{% endif %}
+{% endblock %}

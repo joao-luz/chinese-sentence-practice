@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Chinese Sentence Learner{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>汉字 Practice</h1>
+    <p class="subtitle">{{ char_count }} characters known</p>
+    <nav class="tabs">
+      <a href="{{ url_for('generate') }}" class="{{ 'active' if tab == 'generate' }}">Generate sentence</a>
+      <a href="{{ url_for('vocabulary') }}" class="{{ 'active' if tab == 'vocabulary' }}">My vocabulary</a>
+      <a href="{{ url_for('settings_page') }}" class="{{ 'active' if tab == 'settings' }}">Settings</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>Claude API key</h2>
+  <p class="hint">Only needed for the Claude API source. Stored on this computer in <code>data/settings.json</code>.</p>
+  {% if masked_key %}
+    <form method="post" class="row key-status">
+      <span>Current key: <code>{{ masked_key }}</code></span>
+      <button type="submit" name="remove_key" value="1" class="secondary">Remove</button>
+    </form>
+  {% else %}
+    <p>No key saved.</p>
+  {% endif %}
+  <form method="post" class="row">
+    <input type="password" name="api_key" placeholder="sk-ant-..." autocomplete="off">
+    <button type="submit">{{ 'Replace key' if masked_key else 'Save key' }}</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Local model</h2>
+  <p class="hint">Start the server with <code>./serve_local_llm.sh</code> (default model: Qwen/Qwen3-0.6B).
+    Leave the model name empty to use whatever the server is running.</p>
+  <form method="post" class="add-form">
+    <label>Server URL
+      <input type="text" name="local_url" value="{{ local_url }}">
+    </label>
+    <label><span>Model name <span class="optional">(optional)</span></span>
+      <input type="text" name="local_model" value="{{ local_model }}" placeholder="auto-detect">
+    </label>
+    <button type="submit">Save</button>
+  </form>
+</section>
+
+{% if message %}
+  <p class="notice">{{ message }}</p>
+{% endif %}
+{% endblock %}

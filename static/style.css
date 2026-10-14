@@ -1,0 +1,178 @@
+:root {
+  --bg: #f7f5f0;
+  --card: #ffffff;
+  --text: #222222;
+  --muted: #6b6b6b;
+  --accent: #b5342b;
+  --border: #e3ded3;
+  --error-bg: #fbe9e7;
+  --notice-bg: #eef5ea;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1b1a18;
+    --card: #262522;
+    --text: #ece9e2;
+    --muted: #a19d94;
+    --accent: #e0675d;
+    --border: #3a3833;
+    --error-bg: #3d2421;
+    --notice-bg: #243222;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, "Noto Sans SC", "PingFang SC", sans-serif;
+  line-height: 1.5;
+}
+
+header, main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+header { padding-top: 24px; }
+h1 { margin: 0; font-size: 1.6rem; }
+h2 { margin: 0 0 12px; font-size: 1.05rem; }
+.subtitle { margin: 4px 0 16px; color: var(--muted); }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border);
+}
+
+.tabs a {
+  padding: 8px 16px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tabs a:hover { color: var(--text); }
+.tabs a.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+main { padding-top: 20px; padding-bottom: 40px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row input { flex: 1 1 220px; }
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 8px 10px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+button {
+  padding: 8px 18px;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover { filter: brightness(1.1); }
+
+.add-form { display: grid; gap: 10px; }
+.add-form label { display: grid; gap: 4px; font-size: 0.9rem; color: var(--muted); }
+.add-form button { justify-self: start; }
+.optional { font-size: 0.8rem; }
+
+.notice { padding: 10px 14px; border-radius: 8px; background: var(--notice-bg); }
+.notice.error { background: var(--error-bg); }
+.hint { color: var(--muted); }
+
+.label { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.english { font-size: 1.4rem; margin: 6px 0 14px; }
+
+details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.chinese { font-size: 2rem; margin: 12px 0 0; letter-spacing: 0.05em; }
+.pinyin { margin: 4px 0 0; color: var(--muted); }
+
+.char-grid { font-size: 1.6rem; letter-spacing: 0.25em; margin: 0; word-break: break-all; }
+
+.entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.entries li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.entry-text { font-size: 1.15rem; }
+.entry-pinyin, .entry-meaning { color: var(--muted); font-size: 0.85rem; }
+
+.delete {
+  padding: 0 8px;
+  line-height: 1.6;
+  color: var(--muted);
+  background: transparent;
+  font-weight: 400;
+}
+
+.delete:hover { color: var(--accent); filter: none; }
+
+.generate-form { display: grid; gap: 12px; }
+
+.sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.sources legend { padding: 0; margin-bottom: 6px; font-size: 0.9rem; color: var(--muted); }
+.source-option { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.source-option input { accent-color: var(--accent); }
+
+/* The theme only matters for Claude: hide it when Tatoeba is picked (no JS). */
+.generate-form:has(#src-tatoeba:checked) .theme-field { display: none; }
+
+.also { margin: 8px 0 0; color: var(--muted); font-size: 0.9rem; }
+.credit { margin: 14px 0 0; font-size: 0.8rem; color: var(--muted); }
+.credit a { color: var(--muted); }
+
+code { font-size: 0.9em; }
+.key-status { align-items: center; justify-content: space-between; margin-bottom: 12px; }
+
+button.secondary {
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+}
