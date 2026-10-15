@@ -20,8 +20,9 @@ FEW_SHOT = 4
 ALLOWED_PUNCTUATION = "，。？！"
 
 SYSTEM_PROMPT = (
-    "You write one short, natural, grammatical Mandarin sentence for a beginner "
-    "learner, then its exact English translation. Reply with JSON only."
+    "You write short, natural, grammatical Mandarin sentences for a beginner "
+    "learner, each with its exact English translation. Make every sentence "
+    "different. Reply with JSON only."
 )
 
 
@@ -38,6 +39,24 @@ def _get(url):
         return json.load(r)
 
 
+# One complete {"chinese": ..., "english": ...} object, for salvaging a reply
+# that was cut off before the closing brackets.
+ITEM = re.compile(r'\{\s*"chinese"\s*:\s*"(?:[^"\\]|\\.)*"\s*,\s*"english"\s*:\s*"(?:[^"\\]|\\.)*"\s*\}')
+
+
+def _parse_items(content):
+    try:
+        return json.loads(content)["sentences"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return [json.loads(m) for m in ITEM.findall(content)]
+
+
+def _degenerate(chinese):
+    """Small models sometimes loop (不，不，不，不…); drop those sentences."""
+    han = HAN.findall(chinese)
+    return chinese.count("，") > 2 or any(han.count(c) > 2 for c in set(han))
+
+
 def _examples(entries):
     """Real Tatoeba sentences the learner can read, used as few-shot examples."""
     try:
@@ -50,7 +69,8 @@ def _examples(entries):
     return random.sample(pool, k=min(FEW_SHOT, len(pool)))
 
 
-def generate(entries, theme="", base_url="", model=""):
+def generate(entries, theme="", base_url="", model="", n=1):
+    """Return a list of up to n sentences."""
     allowed = "".join(known_characters(entries))
     if not allowed:
         raise GenerationError("Add some vocabulary first.")
@@ -60,7 +80,7 @@ def generate(entries, theme="", base_url="", model=""):
         if not model:  # use whatever the server is serving
             model = _get(f"{base_url}/models")["data"][0]["id"]
 
-        schema = {
+        sentence = {
             "type": "object",
             "properties": {
                 "chinese": {
@@ -72,17 +92,27 @@ def generate(entries, theme="", base_url="", model=""):
             "required": ["chinese", "english"],
             "additionalProperties": False,
         }
+        schema = {
+            "type": "object",
+            "properties": {"sentences": {"type": "array", "items": sentence, "minItems": n, "maxItems": n}},
+            "required": ["sentences"],
+            "additionalProperties": False,
+        }
 
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-        for s in _examples(entries):
+        examples = _examples(entries)
+        if examples:
             messages += [
-                {"role": "user", "content": "New sentence."},
-                {"role": "assistant", "content": json.dumps(
-                    {"chinese": s["chinese"], "english": s["english"][0]}, ensure_ascii=False
-                )},
+                {"role": "user", "content": f"Write {len(examples)} sentences."},
+                {"role": "assistant", "content": json.dumps({"sentences": [
+                    {"chinese": s["chinese"], "english": s["english"][0]} for s in examples
+                ]}, ensure_ascii=False)},
             ]
-        words = random.sample([e["text"] for e in entries], k=min(8, len(entries)))
-        request = "New sentence, different from the previous ones. Words you can use: " + "、".join(words)
+        words = random.sample([e["text"] for e in entries], k=min(8 + n, len(entries)))
+        request = (
+            f"Write {n} new sentence{'s' if n > 1 else ''}, different from the previous ones. "
+            "Words you can use: " + "、".join(words)
+        )
         if theme:
             request += f". Topic: {theme}"
         messages.append({"role": "user", "content": request})
@@ -90,7 +120,7 @@ def generate(entries, theme="", base_url="", model=""):
         response = _post(f"{base_url}/chat/completions", {
             "model": model,
             "messages": messages,
-            "max_tokens": 150,
+            "max_tokens": 150 * n,
             # Qwen3 thinks by default; that's slow on a CPU and not needed here.
             "chat_template_kwargs": {"enable_thinking": False},
             "response_format": {
@@ -108,17 +138,25 @@ def generate(entries, theme="", base_url="", model=""):
         raise GenerationError("The local model took too long to answer.")
 
     try:
-        result = json.loads(response["choices"][0]["message"]["content"])
-    except (KeyError, IndexError, json.JSONDecodeError):
+        items = _parse_items(response["choices"][0]["message"]["content"])
+    except (KeyError, IndexError, TypeError):
         raise GenerationError("The local model returned something unexpected. Try again.")
 
-    # The regex already guarantees this; double-check in case the server ignored it.
-    if set(HAN.findall(result["chinese"])) - set(allowed):
-        raise GenerationError("The local model used characters you don't know. Try again.")
-
-    return {
-        "english": result["english"],
-        "chinese": result["chinese"],
-        "pinyin": to_pinyin(result["chinese"]),
-        "note": f"Written by {model} running locally. Small models make mistakes: double-check the grammar.",
-    }
+    note = f"Written by {model} running locally. Small models make mistakes: double-check the grammar."
+    sentences, seen = [], set()
+    for item in items:
+        chinese = item.get("chinese", "") if isinstance(item, dict) else ""
+        # The regex already guarantees known characters; double-check in case
+        # the server ignored it, and drop repeats.
+        if not chinese or chinese in seen or _degenerate(chinese) or set(HAN.findall(chinese)) - set(allowed):
+            continue
+        seen.add(chinese)
+        sentences.append({
+            "english": item.get("english", ""),
+            "chinese": chinese,
+            "pinyin": to_pinyin(chinese),
+            "note": note,
+        })
+    if not sentences:
+        raise GenerationError("The local model didn't return a usable sentence. Try again.")
+    return sentences

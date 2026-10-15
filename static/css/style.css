@@ -32,6 +32,8 @@ body {
   line-height: 1.5;
 }
 
+a { color: var(--accent); }
+
 header, main {
   max-width: 720px;
   margin: 0 auto;
@@ -74,7 +76,8 @@ main { padding-top: 20px; padding-bottom: 40px; }
 .row input { flex: 1 1 220px; }
 
 input[type="text"],
-input[type="password"] {
+input[type="password"],
+input[type="search"] {
   width: 100%;
   padding: 8px 10px;
   font: inherit;
@@ -115,26 +118,86 @@ details summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 
 .char-grid { font-size: 1.6rem; letter-spacing: 0.25em; margin: 0; word-break: break-all; }
 
-.entries {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.vocab-list { list-style: none; margin: 0; padding: 0; }
+
+.list-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 8px;
 }
 
-.entries li {
-  display: flex;
+.list-header h2 { margin: 0; }
+.list-header input { flex: 0 1 280px; }
+.vocab-item[hidden] { display: none; }
+
+.vocab-item {
+  display: grid;
+  grid-template-columns: minmax(5em, auto) minmax(6em, 9em) 1fr auto;
   align-items: center;
-  gap: 6px;
-  padding: 4px 4px 4px 10px;
+  gap: 4px 14px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.vocab-item:first-child { border-top: none; }
+.vocab-item:target { background: var(--notice-bg); }
+.vocab-text { font-size: 1.3rem; }
+.vocab-pinyin { color: var(--muted); }
+.vocab-meanings { display: flex; flex-wrap: wrap; gap: 4px; }
+.vocab-actions { display: flex; gap: 4px; align-items: center; }
+
+.meaning-tag {
+  padding: 1px 8px;
+  font-size: 0.85rem;
   border: 1px solid var(--border);
   border-radius: 999px;
 }
 
-.entry-text { font-size: 1.15rem; }
-.entry-pinyin, .entry-meaning { color: var(--muted); font-size: 0.85rem; }
+.none { color: var(--muted); font-size: 0.85rem; font-style: italic; }
+
+.edit-button { padding: 4px 12px; font-size: 0.85rem; }
+
+@media (max-width: 560px) {
+  .vocab-item { grid-template-columns: auto 1fr auto; }
+  .vocab-meanings { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* Pinyin and meaning rows (wired up by static/js/dynamic_list.js) */
+.field { display: grid; gap: 4px; }
+.field-label { font-size: 0.9rem; color: var(--muted); }
+.value-rows { display: grid; gap: 6px; }
+.link-row { display: flex; gap: 6px; align-items: center; }
+.link-row.invalid input { border-color: var(--accent); }
+
+.link-row-remove {
+  padding: 0 10px;
+  line-height: 2;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  font-weight: 400;
+}
+
+.link-row-remove:hover { color: var(--accent); filter: none; }
+.link-row-remove-invisible { visibility: hidden; }
+
+/* Edit overlay */
+.overlay {
+  width: min(480px, calc(100% - 32px));
+  padding: 0;  /* so a click on the dialog itself means "outside the form" */
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.overlay::backdrop { background: rgb(0 0 0 / 0.5); }
+.overlay form { padding: 20px; }
+.dialog-title { font-size: 2rem; font-weight: 400; margin: 0; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 .delete {
   padding: 0 8px;
@@ -176,3 +239,6 @@ button.secondary {
   background: transparent;
   border: 1px solid var(--border);
 }
+
+.settings-model { margin-top: 14px; }
+.settings-model .hint { margin: 0; font-size: 0.85rem; }

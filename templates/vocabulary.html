@@ -4,12 +4,14 @@
   <label>Character, word or expression
     <input type="text" name="text" required placeholder="e.g. 朋友">
   </label>
-  <label><span>Pinyin <span class="optional">(optional)</span></span>
-    <input type="text" name="pinyin" placeholder="péngyou">
-  </label>
-  <label><span>Meaning <span class="optional">(optional)</span></span>
-    <input type="text" name="meaning" placeholder="friend">
-  </label>
+  <div class="field">
+    <span class="field-label">Pinyin <span class="optional">(optional)</span></span>
+    <div id="add-pinyin" class="value-rows"></div>
+  </div>
+  <div class="field">
+    <span class="field-label">Meanings <span class="optional">(optional)</span></span>
+    <div id="add-meanings" class="value-rows"></div>
+  </div>
   <button type="submit">Add</button>
 </form>
 
@@ -23,18 +25,56 @@
 </section>
 
 <section class="card">
-  <h2>Words and expressions ({{ entries|length }})</h2>
+  <div class="list-header">
+    <h2>Words and expressions (<span id="vocab-count">{{ entries|length }}</span>)</h2>
+    <input type="search" id="vocab-search" placeholder="Search characters, pinyin or meanings"
+           aria-label="Search words and expressions" autocomplete="off">
+  </div>
+  <p id="vocab-empty" class="none" hidden>No words match your search.</p>
   <form method="post">
-    <ul class="entries">
+    <ul class="vocab-list">
       {% for e in entries %}
-        <li>
-          <span class="entry-text">{{ e.text }}</span>
-          {% if e.pinyin %}<span class="entry-pinyin">{{ e.pinyin }}</span>{% endif %}
-          {% if e.meaning %}<span class="entry-meaning">{{ e.meaning }}</span>{% endif %}
-          <button type="submit" name="delete" value="{{ e.text }}" class="delete" title="Remove {{ e.text }}">×</button>
+        <li id="entry-{{ e.text }}" class="vocab-item"
+            data-text="{{ e.text }}"
+            data-pinyin='{{ e.pinyin|tojson }}'
+            data-suggested-pinyin="{{ e.text|pinyin }}"
+            data-meanings='{{ e.meanings|tojson }}'>
+          <span class="vocab-text">{{ e.text }}</span>
+          <span class="vocab-pinyin">{{ e.pinyin|join(" / ") }}</span>
+          <span class="vocab-meanings">
+            {% for m in e.meanings %}<span class="meaning-tag">{{ m }}</span>{% else %}<span class="none">no meanings yet</span>{% endfor %}
+          </span>
+          <span class="vocab-actions">
+            <button type="button" class="secondary edit-button">Edit</button>
+            <button type="submit" name="delete" value="{{ e.text }}" class="delete" title="Remove {{ e.text }}">×</button>
+          </span>
         </li>
       {% endfor %}
     </ul>
   </form>
 </section>
+
+<dialog id="edit-dialog" class="overlay">
+  <form method="post" action="{{ url_for('edit_entry') }}" class="add-form">
+    <h2 class="dialog-title"><span id="edit-title"></span></h2>
+    <input type="hidden" name="text" id="edit-text">
+    <div class="field">
+      <span class="field-label">Pinyin</span>
+      <div id="edit-pinyin" class="value-rows"></div>
+    </div>
+    <div class="field">
+      <span class="field-label">Meanings you know</span>
+      <div id="edit-meanings" class="value-rows"></div>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" id="edit-cancel">Cancel</button>
+      <button type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dynamic_list.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vocabulary.js') }}"></script>
 {% endblock %}

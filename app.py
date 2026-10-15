@@ -6,14 +6,16 @@ from pathlib import Path
 
 from flask import Flask, redirect, render_template, request, url_for
 
-from common import HAN, GenerationError, known_characters
-from sources import SOURCES, claude_api, local_llm, tatoeba
+import sentence_cache
+from common import HAN, GenerationError, known_characters, to_pinyin
+from sources import SOURCES, claude_api, local_llm, openrouter, tatoeba
 
 BASE_DIR = Path(__file__).parent
 VOCAB_FILE = BASE_DIR / "data" / "vocab.json"
 SETTINGS_FILE = BASE_DIR / "data" / "settings.json"
 
 app = Flask(__name__)
+app.jinja_env.filters["pinyin"] = to_pinyin  # suggested pinyin in the vocabulary forms
 
 
 # ---------- storage ----------
@@ -33,14 +35,24 @@ def load_vocab():
     return load_json(VOCAB_FILE, [])
 
 
+def form_list(name):
+    """Values from a dynamic list: one input per row, empty rows ignored."""
+    return [v.strip() for v in request.form.getlist(name) if v.strip()]
+
+
 def load_settings():
-    defaults = {"api_key": "", "source": "tatoeba", "local_url": local_llm.DEFAULT_URL, "local_model": ""}
+    defaults = {
+        "source": "tatoeba",
+        "api_key": "",  # Claude
+        "openrouter_key": "", "openrouter_model": openrouter.DEFAULT_MODEL,
+        "local_url": local_llm.DEFAULT_URL, "local_model": "",
+    }
     return {**defaults, **load_json(SETTINGS_FILE, {})}
 
 
 def save_settings(settings):
     save_json(SETTINGS_FILE, settings)
-    SETTINGS_FILE.chmod(0o600)  # the file holds the API key
+    SETTINGS_FILE.chmod(0o600)  # the file holds API keys
 
 
 def mask(key):
@@ -71,11 +83,19 @@ def generate():
             save_settings(settings)
         try:
             if source == "claude":
-                result = claude_api.generate(entries, theme, settings["api_key"])
+                key = sentence_cache.cache_key(source, claude_api.MODEL, theme)
+                generate_batch = lambda n: claude_api.generate(entries, theme, settings["api_key"], n)
+            elif source == "openrouter":
+                model = settings["openrouter_model"]
+                key = sentence_cache.cache_key(source, model, theme)
+                generate_batch = lambda n: openrouter.generate(entries, theme, settings["openrouter_key"], model, n)
             elif source == "local":
-                result = local_llm.generate(
-                    entries, theme, settings["local_url"], settings["local_model"]
+                key = sentence_cache.cache_key(source, settings["local_url"], settings["local_model"], theme)
+                generate_batch = lambda n: local_llm.generate(
+                    entries, theme, settings["local_url"], settings["local_model"], n
                 )
+            if source in ("claude", "openrouter", "local"):
+                result = sentence_cache.next_sentence(key, entries, generate_batch)
             else:
                 last_id = request.form.get("last_id", type=int)
                 result = tatoeba.generate(entries, exclude_id=last_id)
@@ -108,8 +128,8 @@ def vocabulary():
                 before = known_characters(entries)
                 entries.append({
                     "text": text,
-                    "pinyin": request.form.get("pinyin", "").strip(),
-                    "meaning": request.form.get("meaning", "").strip(),
+                    "pinyin": form_list("pinyin"),
+                    "meanings": form_list("meaning"),
                 })
                 save_json(VOCAB_FILE, entries)
                 new = "".join(c for c in known_characters(entries) if c not in before)
@@ -121,33 +141,58 @@ def vocabulary():
     )
 
 
+@app.route("/vocabulary/edit", methods=["POST"])
+def edit_entry():
+    entries = load_vocab()
+    text = request.form.get("text", "")
+    for e in entries:
+        if e["text"] == text:
+            e["pinyin"] = form_list("pinyin")
+            e["meanings"] = form_list("meaning")
+            save_json(VOCAB_FILE, entries)
+            break
+    return redirect(url_for("vocabulary", _anchor=f"entry-{text}"))
+
+
+# Settings key -> (expected prefix, display name) for each hosted provider.
+API_KEYS = {
+    "api_key": ("sk-ant-", "Claude"),
+    "openrouter_key": ("sk-or-", "OpenRouter"),
+}
+
+
 @app.route("/settings", methods=["GET", "POST"])
 def settings_page():
     settings = load_settings()
     message = None
     if request.method == "POST":
-        if "local_url" in request.form:
-            settings["local_url"] = request.form["local_url"].strip() or local_llm.DEFAULT_URL
+        form = request.form.get("form")
+        if form in API_KEYS:
+            prefix, name = API_KEYS[form]
+            key = request.form.get("key", "").strip()
+            if "remove" in request.form:
+                settings[form] = ""
+                message = f"{name} API key removed."
+            elif not key:
+                message = "Paste a key to save it."
+            elif not key.startswith(prefix):
+                message = f"That doesn't look like a valid {name} API key (they start with {prefix})."
+            else:
+                settings[form] = key
+                message = f"{name} API key saved."
+        elif form == "openrouter_model":
+            settings["openrouter_model"] = request.form["model"].strip() or openrouter.DEFAULT_MODEL
+            message = message or "OpenRouter model saved."
+        elif form == "local":
+            settings["local_url"] = request.form.get("local_url", "").strip() or local_llm.DEFAULT_URL
             settings["local_model"] = request.form.get("local_model", "").strip()
             message = "Local model settings saved."
-        elif "remove_key" in request.form:
-            settings["api_key"] = ""
-            message = "API key removed."
-        else:
-            key = request.form.get("api_key", "").strip()
-            if not key:
-                message = "Paste a key to save it."
-            elif not key.startswith("sk-ant-"):
-                message = "That doesn't look like a Claude API key (they start with sk-ant-)."
-            else:
-                settings["api_key"] = key
-                message = "API key saved."
         save_settings(settings)
-    key = settings["api_key"]
     return render_template(
-        "settings.html", tab="settings", message=message,
-        masked_key=mask(key) if key else None,
-        local_url=settings["local_url"], local_model=settings["local_model"],
+        "settings.html", tab="settings", message=message, settings=settings,
+        masked={k: mask(settings[k]) for k in API_KEYS if settings[k]},
+        openrouter_models=openrouter.list_models(),
+        openrouter_default=openrouter.DEFAULT_MODEL,
         char_count=len(known_characters(load_vocab())),
     )
 

@@ -1,7 +1,8 @@
 # Chinese Sentence Learner
 
 A small Flask app that shows English sentences whose Chinese translation uses
-only the characters you know. Pure HTML/CSS frontend, no JavaScript.
+only the characters you know. Plain HTML/CSS frontend with no libraries; the
+vocabulary page uses a little vanilla JS (`static/js/`) for its edit overlay.
 
 ## Setup
 
@@ -20,10 +21,22 @@ Open http://localhost:5000.
     Mandarin–English pairs that uses only your characters.
   - **Local model**: a small model running on your own computer through vLLM
     (see below). Free and offline, but slower and makes more mistakes.
+  - **OpenRouter**: one API key for hundreds of models, some free (IDs ending
+    in `:free`, with tight rate limits). Pick the model in Settings; the
+    default is a free one.
   - **Claude API**: writes a new sentence for you, optionally on a theme.
     Needs an API key.
-- **My vocabulary**: add or remove characters, words and expressions.
-- **Settings**: save or remove your Claude API key; set the local model server.
+- The three model sources (local, OpenRouter, Claude) keep a cache of
+  sentences: each request asks for a batch of 10, and once 8 of a batch are
+  used the next 10 are fetched in the background. The first sentence on an
+  empty cache is generated on the spot. There's one cache per source, model
+  and theme, saved in `data/sentence_cache.json`, and every cached sentence is
+  re-checked against your current characters before it's shown.
+- **My vocabulary**: add, edit or remove characters, words and expressions.
+  Each entry has pinyin and a list of the meanings you know; click **Edit**
+  to change them.
+- **Settings**: save or remove your OpenRouter and Claude API keys, choose the
+  OpenRouter model, and set the local model server.
 
 ## Local model (vLLM on the CPU)
 

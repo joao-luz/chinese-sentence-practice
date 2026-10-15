@@ -35,6 +35,12 @@
       {% endif %}
     </details>
     {% if result.note %}<p class="credit">{{ result.note }}</p>{% endif %}
+    {% if result.cached_left is defined %}
+      <p class="credit">
+        {{ result.cached_left }} more sentence{{ '' if result.cached_left == 1 else 's' }} ready
+        {%- if result.refilling %} · fetching more in the background{% endif %}
+      </p>
+    {% endif %}
     {% if result.credit_url %}
       <p class="credit">
         <a href="{{ result.credit_url }}" target="_blank" rel="noopener">{{ result.credit_label }}</a>

@@ -10,6 +10,9 @@ __pycache__/
 .env
 data/settings.json
 
+# Cached model-written sentences (per machine)
+data/sentence_cache.json
+
 # Tatoeba downloads and the corpus built from them (recreate with build_tatoeba.py)
 data/tatoeba/
 

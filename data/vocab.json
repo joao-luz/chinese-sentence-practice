@@ -1,267 +1,503 @@
 [
   {
     "text": "你",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "nǐ"
+    ],
+    "meanings": [
+      "you"
+    ]
   },
   {
     "text": "好",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "hǎo"
+    ],
+    "meanings": [
+      "good",
+      "well"
+    ]
   },
   {
     "text": "老",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "lǎo"
+    ],
+    "meanings": [
+      "old"
+    ]
   },
   {
     "text": "师",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "shī"
+    ],
+    "meanings": [
+      "teacher",
+      "master"
+    ]
   },
   {
     "text": "您",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "nín"
+    ],
+    "meanings": [
+      "you (polite)"
+    ]
   },
   {
     "text": "大",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "dà"
+    ],
+    "meanings": [
+      "big"
+    ]
   },
   {
     "text": "家",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "jiā"
+    ],
+    "meanings": [
+      "home",
+      "family"
+    ]
   },
   {
     "text": "学",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "xué"
+    ],
+    "meanings": [
+      "to study",
+      "to learn"
+    ]
   },
   {
     "text": "生",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "shēng"
+    ],
+    "meanings": [
+      "to be born",
+      "life (学生 = student)"
+    ]
   },
   {
     "text": "不",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "bù"
+    ],
+    "meanings": [
+      "not",
+      "no"
+    ]
   },
   {
     "text": "谢",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "xiè"
+    ],
+    "meanings": [
+      "to thank"
+    ]
   },
   {
     "text": "客",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "kè"
+    ],
+    "meanings": [
+      "guest (客气 = polite)"
+    ]
   },
   {
     "text": "气",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "qì"
+    ],
+    "meanings": [
+      "air",
+      "anger (生气 = angry)"
+    ]
   },
   {
     "text": "见",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "jiàn"
+    ],
+    "meanings": [
+      "to see",
+      "to meet"
+    ]
   },
   {
     "text": "同",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "tóng"
+    ],
+    "meanings": [
+      "same",
+      "together (同学 = classmate)"
+    ]
   },
   {
     "text": "门",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "mén"
+    ],
+    "meanings": [
+      "door",
+      "gate"
+    ]
   },
   {
     "text": "再",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "zài"
+    ],
+    "meanings": [
+      "again"
+    ]
   },
   {
     "text": "没",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "méi"
+    ],
+    "meanings": [
+      "not (have)",
+      "didn't"
+    ]
   },
   {
     "text": "事",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "shì"
+    ],
+    "meanings": [
+      "matter",
+      "thing",
+      "business"
+    ]
   },
   {
     "text": "很",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "hěn"
+    ],
+    "meanings": [
+      "very"
+    ]
   },
   {
     "text": "高",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "gāo"
+    ],
+    "meanings": [
+      "tall",
+      "high"
+    ]
   },
   {
     "text": "兴",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "xìng"
+    ],
+    "meanings": [
+      "mood",
+      "interest (高兴 = happy)"
+    ]
   },
   {
     "text": "认识",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "rènshi"
+    ],
+    "meanings": [
+      "to know (someone)",
+      "to recognize"
+    ]
   },
   {
     "text": "字",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "zì"
+    ],
+    "meanings": [
+      "character",
+      "word"
+    ]
   },
   {
     "text": "对不起",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "duìbuqǐ"
+    ],
+    "meanings": [
+      "sorry",
+      "excuse me"
+    ]
   },
   {
     "text": "请",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "qǐng"
+    ],
+    "meanings": [
+      "please",
+      "to invite"
+    ]
   },
   {
     "text": "文",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "wén"
+    ],
+    "meanings": [
+      "language",
+      "writing (中文 = Chinese)"
+    ]
   },
   {
     "text": "问",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "wèn"
+    ],
+    "meanings": [
+      "to ask"
+    ]
   },
   {
     "text": "是",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "shì"
+    ],
+    "meanings": [
+      "to be",
+      "yes"
+    ]
   },
   {
     "text": "没关系",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "méi guānxi"
+    ],
+    "meanings": [
+      "it doesn't matter",
+      "no problem"
+    ]
   },
   {
     "text": "我",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "wǒ"
+    ],
+    "meanings": [
+      "I",
+      "me"
+    ]
   },
   {
     "text": "叫",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "jiào"
+    ],
+    "meanings": [
+      "to be called",
+      "to call",
+      "to shout"
+    ]
   },
   {
     "text": "什么",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "shénme"
+    ],
+    "meanings": [
+      "what"
+    ]
   },
   {
     "text": "名",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "míng"
+    ],
+    "meanings": [
+      "name (名字 = name)"
+    ]
   },
   {
     "text": "对",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "duì"
+    ],
+    "meanings": [
+      "correct",
+      "right",
+      "towards"
+    ]
   },
   {
     "text": "人",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "rén"
+    ],
+    "meanings": [
+      "person",
+      "people"
+    ]
   },
   {
     "text": "的",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "de"
+    ],
+    "meanings": [
+      "possessive particle"
+    ]
   },
   {
     "text": "中",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "zhōng"
+    ],
+    "meanings": [
+      "middle"
+    ]
   },
   {
     "text": "国",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "guó"
+    ],
+    "meanings": [
+      "country"
+    ]
   },
   {
     "text": "法国",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "Fǎguó"
+    ],
+    "meanings": [
+      "France"
+    ]
   },
   {
     "text": "这",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "zhè"
+    ],
+    "meanings": [
+      "this"
+    ]
   },
   {
     "text": "谁",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "shéi"
+    ],
+    "meanings": [
+      "who"
+    ]
   },
   {
     "text": "他",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "tā"
+    ],
+    "meanings": [
+      "he",
+      "him"
+    ]
   },
   {
     "text": "她",
-    "pinyin": "",
-    "meaning": ""
-  },
-  {
-    "text": "你是那国人",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "tā"
+    ],
+    "meanings": [
+      "she",
+      "her"
+    ]
   },
   {
     "text": "哪",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "nǎ"
+    ],
+    "meanings": [
+      "which"
+    ]
   },
   {
     "text": "姐姐",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "jiějie"
+    ],
+    "meanings": [
+      "older sister"
+    ]
   },
   {
     "text": "工作",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "gōngzuò"
+    ],
+    "meanings": [
+      "work",
+      "job",
+      "to work"
+    ]
   },
   {
     "text": "还",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "hái"
+    ],
+    "meanings": [
+      "still"
+    ]
   },
   {
     "text": "忙",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "máng"
+    ],
+    "meanings": [
+      "busy"
+    ]
   },
   {
     "text": "吗",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "ma"
+    ],
+    "meanings": [
+      "question particle (yes/no questions)"
+    ]
   },
   {
     "text": "太",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "tài"
+    ],
+    "meanings": [
+      "too"
+    ]
   },
   {
     "text": "想",
-    "pinyin": "",
-    "meaning": ""
+    "pinyin": [
+      "xiǎng"
+    ],
+    "meanings": [
+      "to think",
+      "to miss"
+    ]
   }
 ]
