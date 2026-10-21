@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h2>Practice balance</h2>
+  {% if counts %}
+    <p class="hint">How many generated sentences use each word or expression. New sentences are
+      built around the ones used least, so over time these even out.
+      {% set values = counts|map(attribute=1)|list %}
+      Now: {{ values|min }}–{{ values|max }} uses each.</p>
+    <p class="usage-grid">
+      {% for text, n in counts %}<span class="meaning-tag{{ ' unused' if n == 0 }}">{{ text }} <b>{{ n }}</b></span>{% endfor %}
+    </p>
+  {% else %}
+    <p class="hint">Add some vocabulary first.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Previous sentences ({{ sentences|length }})</h2>
+  {% if not sentences %}
+    <p class="hint">Sentences you generate will be listed here for reference.</p>
+  {% endif %}
+  <ul class="history-list">
+    {% for s in sentences %}
+      <li class="history-item">
+        <p class="history-chinese">{{ s.chinese }}</p>
+        {% if s.pinyin %}<p class="pinyin">{{ s.pinyin }}</p>{% endif %}
+        <p class="history-english">{{ s.english }}</p>
+        <p class="credit">
+          {% for t in s.used %}<span class="meaning-tag">{{ t }}</span> {% endfor %}
+          · {{ sources.get(s.source, s.source) }} · {{ s.shown|when }}
+          {% if s.credit_url %} · <a href="{{ s.credit_url }}" target="_blank" rel="noopener">source</a>{% endif %}
+        </p>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

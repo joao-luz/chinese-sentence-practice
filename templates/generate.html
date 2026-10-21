@@ -30,6 +30,9 @@
       <summary>Show answer</summary>
       <p class="chinese">{{ result.chinese }}</p>
       {% if result.pinyin %}<p class="pinyin">{{ result.pinyin }}</p>{% endif %}
+      {% if result.used %}
+        <p class="used">Practises: {% for t in result.used %}<span class="meaning-tag">{{ t }}</span>{% endfor %}</p>
+      {% endif %}
       {% if result.other_english %}
         <p class="also">Also translated as: {{ result.other_english|join(" / ") }}</p>
       {% endif %}

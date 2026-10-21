@@ -15,6 +15,7 @@ import logging
 import threading
 from pathlib import Path
 
+import history
 from common import HAN, GenerationError, known_characters
 
 BATCH_SIZE = 10
@@ -46,9 +47,9 @@ def cache_key(*parts):
     return "|".join(str(p).strip().lower() for p in parts)
 
 
-def _refill(key, generate):
+def _refill(key, generate, source):
     try:
-        batch = generate(BATCH_SIZE)
+        batch = history.record(generate(BATCH_SIZE), source)
         with _lock:
             queues = _load()
             queue = queues.setdefault(key, [])
@@ -65,17 +66,17 @@ def _refill(key, generate):
             _refilling.discard(key)
 
 
-def _start_refill(key, generate):
+def _start_refill(key, generate, source):
     """Start a background refill unless one is already running for this key.
     Call with _lock held."""
     if key in _refilling:
         return
     _refilling.add(key)
-    threading.Thread(target=_refill, args=(key, generate), daemon=True).start()
+    threading.Thread(target=_refill, args=(key, generate, source), daemon=True).start()
 
 
-def next_sentence(key, entries, generate):
-    """Return the next sentence for `key`.
+def next_sentence(key, entries, generate, source):
+    """Return the next sentence for `key`, recording it in the history.
 
     `generate(n)` must return a list of up to n sentences; it is called with
     BATCH_SIZE in the background, or with 1 when the cache is empty.
@@ -92,10 +93,14 @@ def next_sentence(key, entries, generate):
                 break
         _save(queues)
         if len(queue) <= REFILL_AT:
-            _start_refill(key, generate)
+            _start_refill(key, generate, source)
         refilling = key in _refilling
 
     if sentence is None:
         # Cold cache: answer now with a single sentence while the batch loads.
-        sentence = generate(1)[0]
+        sentence = history.record(generate(1)[:1], source, shown=True)[0]
+    elif "history_id" in sentence:
+        history.mark_shown(sentence["history_id"])
+    else:  # cached before the history existed
+        sentence = history.record([sentence], source, shown=True)[0]
     return {**sentence, "cached_left": len(queue), "refilling": refilling}

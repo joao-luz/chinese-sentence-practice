@@ -17,6 +17,10 @@
   </form>
 {% endmacro %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 {% if message %}
   <p class="notice">{{ message }}</p>
@@ -27,26 +31,44 @@
   <p class="hint">One key for many models, including free ones. Get a key at
     <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>.</p>
   {{ key_form("openrouter_key", "sk-or-...") }}
-  <form method="post" class="add-form settings-model">
-    <input type="hidden" name="form" value="openrouter_model">
-    <label>Model
-      <input type="text" name="model" value="{{ settings.openrouter_model }}" list="openrouter-models"
-             placeholder="{{ openrouter_default }}" autocomplete="off">
-    </label>
-    <datalist id="openrouter-models">
-      {% for m in openrouter_models %}<option value="{{ m.id }}">{{ m.label }}</option>{% endfor %}
-    </datalist>
-    <p class="hint">
-      {% if openrouter_models %}
-        Start typing to pick from {{ openrouter_models|length }} models that support JSON output
-        ({{ openrouter_models|selectattr("free")|list|length }} free). Free models end in <code>:free</code>
-        and have tight rate limits.
-      {% else %}
-        Couldn't load the model list from OpenRouter; you can still type a model ID.
-      {% endif %}
-    </p>
-    <button type="submit">Save model</button>
+  <form method="post" class="settings-model" id="model-form">
+    <input type="hidden" name="form" value="openrouter_models">
+    <fieldset class="model-list">
+      <legend>Your models</legend>
+      {% for m in settings.openrouter_models %}
+        <div class="model-row">
+          <label class="source-option">
+            <input type="radio" name="model" value="{{ m }}" {{ 'checked' if m == settings.openrouter_model }}>
+            <code>{{ m }}</code>
+          </label>
+          <span class="model-label">
+            {{ openrouter_labels.get(m, "not in OpenRouter's JSON model list" if openrouter_labels else "") }}
+            {%- if m == settings.openrouter_model %} · <strong>in use</strong>{% endif %}
+          </span>
+          <button type="submit" name="remove_model" value="{{ m }}" class="delete" title="Remove {{ m }}">×</button>
+        </div>
+      {% endfor %}
+    </fieldset>
+    <noscript><button type="submit" name="select" value="1">Use selected</button></noscript>
   </form>
+
+  <form method="post" class="row settings-model">
+    <input type="hidden" name="form" value="openrouter_models">
+    <input type="text" name="new_model" list="openrouter-models" placeholder="Add a model, e.g. {{ openrouter_default }}" autocomplete="off">
+    <button type="submit" name="add_model" value="1" class="secondary">Add model</button>
+  </form>
+  <datalist id="openrouter-models">
+    {% for m in openrouter_models %}<option value="{{ m.id }}">{{ m.label }}</option>{% endfor %}
+  </datalist>
+  <p class="hint settings-model">
+    {% if openrouter_models %}
+      Start typing to pick from {{ openrouter_models|length }} models that support JSON output
+      ({{ openrouter_models|selectattr("free")|list|length }} free). Free models end in <code>:free</code>,
+      have tight rate limits and can be slow or temporarily down.
+    {% else %}
+      Couldn't load the model list from OpenRouter; you can still type a model ID.
+    {% endif %}
+  </p>
 </section>
 
 <section class="card">

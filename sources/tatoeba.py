@@ -33,7 +33,9 @@ def matching(entries):
     return [s for s in _load() if s["chars"] and s["chars"] <= allowed]
 
 
-def generate(entries, exclude_id=None):
+def generate(entries, exclude_id=None, priority=()):
+    """Pick a sentence, preferring ones that use the first priority entry
+    (the least practised) that any candidate sentence contains."""
     if not entries:
         raise GenerationError("Add some vocabulary first.")
     candidates = matching(entries)
@@ -41,6 +43,11 @@ def generate(entries, exclude_id=None):
     pool = [s for s in (longer or candidates) if s["id"] != exclude_id] or candidates
     if not pool:
         raise GenerationError("No Tatoeba sentences use only your characters yet. Add more vocabulary.")
+    for text in priority:
+        with_entry = [s for s in pool if text in s["chinese"]]
+        if with_entry:
+            pool = with_entry
+            break
     s = random.choice(pool)
     return {
         "id": s["id"],

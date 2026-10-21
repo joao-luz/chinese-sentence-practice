@@ -38,6 +38,7 @@ Requirements:
 - The Chinese must be grammatical and idiomatic, the way a teacher would actually say it. Never force an unnatural translation just to fit the character set; pick a different sentence instead.
 - The English must translate naturally to exactly that Chinese, so the learner can translate it themselves and check.
 - Keep it beginner level: one clause or two short ones.
+- Some vocabulary entries are marked PRIORITY: the learner has practised them least. Build the sentences around them: every sentence must use at least one priority entry, and across all the sentences use each priority entry at least once. Other vocabulary can fill in around them.
 - When asked for several sentences, make them different from each other: vary the structure (statements, questions, negations) and the words used.
 - Give pinyin with tone marks, words separated by spaces.
 - Reply with a JSON object {"sentences": [{"english": ..., "chinese": ..., "pinyin": ...}, ...]}."""
@@ -61,24 +62,28 @@ def parse_sentences(text):
     return sentences or None
 
 
-def generate_with_retries(entries, theme, ask, n=1):
+def generate_with_retries(entries, theme, ask, n=1, priority=()):
     """Ask for n sentences; keep those that only use known characters.
-    Retries (naming the bad characters) until at least one is usable."""
+    Retries (naming the bad characters) until at least one is usable.
+    `priority` lists the entries the sentences should be built around."""
     allowed = set(known_characters(entries))
     if not allowed:
         raise GenerationError("Add some vocabulary first.")
 
-    # Nudge variety: suggest a few random words to build around.
-    focus = random.sample([e["text"] for e in entries], k=min(3 + n // 2, len(entries)))
-    vocab_lines = "\n".join(
-        f"- {e['text']}" + (f" ({'; '.join(e['meanings'])})" if e.get("meanings") else "")
-        for e in entries
-    )
+    priority = list(priority) or random.sample([e["text"] for e in entries], k=min(3, len(entries)))
+
+    def describe(e):
+        line = f"- {e['text']}"
+        if e.get("meanings"):
+            line += f" ({'; '.join(e['meanings'])})"
+        return line + ("  <- PRIORITY" if e["text"] in priority else "")
+
+    vocab_lines = "\n".join(describe(e) for e in entries)
     prompt = (
         f"Learner vocabulary:\n{vocab_lines}\n\n"
         f"Allowed characters (exhaustive): {''.join(known_characters(entries))}\n\n"
-        f"Write {n} sentence{'s' if n > 1 else ''}. "
-        f"Try to build {'them' if n > 1 else 'it'} around some of these: {', '.join(focus)}"
+        f"Priority entries (use each of them at least once): {', '.join(priority)}\n\n"
+        f"Write {n} sentence{'s' if n > 1 else ''}."
     )
     if theme:
         prompt += f"\nTheme requested by the learner: {theme}"

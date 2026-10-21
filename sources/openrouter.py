@@ -38,15 +38,20 @@ def _error_message(e):
         detail = json.loads(e.read())["error"]["message"]
     except (ValueError, KeyError, TypeError):
         detail = e.reason
+    if e.code in (502, 503) or "provider returned error" in str(detail).lower():
+        # The model's upstream provider failed; free models often have only one.
+        return ("The provider behind this model is failing right now (it's often down for a "
+                f"while on free models). Try again later or pick another model in Settings. ({detail})")
+    if e.code == 404 and "endpoint" in str(detail).lower():
+        return f"No OpenRouter provider can serve this model with JSON output. Pick another model in Settings. ({detail})"
     return {
         401: "OpenRouter rejected the API key. Check it in the Settings tab.",
         402: "Your OpenRouter account is out of credits. Pick a free model (ending in :free) or add credits.",
-        404: f"No OpenRouter provider can serve this model with JSON output. Pick another model in Settings. ({detail})",
         429: "OpenRouter rate limit reached (free models have tight limits). Wait a moment and try again.",
     }.get(e.code, f"OpenRouter error ({e.code}): {detail}")
 
 
-def generate(entries, theme="", api_key="", model="", n=1):
+def generate(entries, theme="", api_key="", model="", n=1, priority=()):
     """Return a list of up to n sentences."""
     if not api_key:
         raise GenerationError("No OpenRouter API key set. Add one in the Settings tab.")
@@ -75,7 +80,7 @@ def generate(entries, theme="", api_key="", model="", n=1):
             return None
 
     try:
-        sentences = generate_with_retries(entries, theme, ask, n)
+        sentences = generate_with_retries(entries, theme, ask, n, priority)
     except urllib.error.HTTPError as e:
         raise GenerationError(_error_message(e))
     except (urllib.error.URLError, ConnectionError):

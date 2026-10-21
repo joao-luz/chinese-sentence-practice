@@ -13,6 +13,7 @@
     <nav class="tabs">
       <a href="{{ url_for('generate') }}" class="{{ 'active' if tab == 'generate' }}">Generate sentence</a>
       <a href="{{ url_for('vocabulary') }}" class="{{ 'active' if tab == 'vocabulary' }}">My vocabulary</a>
+      <a href="{{ url_for('history_page') }}" class="{{ 'active' if tab == 'history' }}">History</a>
       <a href="{{ url_for('settings_page') }}" class="{{ 'active' if tab == 'settings' }}">Settings</a>
     </nav>
   </header>

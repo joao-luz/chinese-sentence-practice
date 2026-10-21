@@ -32,6 +32,13 @@ Open http://localhost:5000.
   empty cache is generated on the spot. There's one cache per source, model
   and theme, saved in `data/sentence_cache.json`, and every cached sentence is
   re-checked against your current characters before it's shown.
+- **Balanced practice**: every generated sentence is recorded in
+  `data/history.json`, and the app counts how often each vocabulary entry has
+  been used. New sentences are built around the least-used entries (the model
+  is told to use each of them; Tatoeba prefers sentences containing them), so
+  over time every entry gets practised about equally.
+- **History**: the sentences you've been shown, newest first, with the entries
+  each one practises, and the usage count of every entry.
 - **My vocabulary**: add, edit or remove characters, words and expressions.
   Each entry has pinyin and a list of the meanings you know; click **Edit**
   to change them.

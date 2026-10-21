@@ -9,7 +9,7 @@ from .prompting import BATCH_SCHEMA, generate_with_retries, parse_sentences
 MODEL = "claude-opus-5-5"
 
 
-def generate(entries, theme="", api_key=None, n=1):
+def generate(entries, theme="", api_key=None, n=1, priority=()):
     """Return a list of up to n sentences."""
     if not api_key:
         raise GenerationError("No Claude API key set. Add one in the Settings tab.")
@@ -33,7 +33,7 @@ def generate(entries, theme="", api_key=None, n=1):
         return parse_sentences(next((b.text for b in response.content if b.type == "text"), ""))
 
     try:
-        return generate_with_retries(entries, theme, ask, n)
+        return generate_with_retries(entries, theme, ask, n, priority)
     except anthropic.AuthenticationError:
         raise GenerationError("The API key was rejected. Check it in the Settings tab.")
     except anthropic.RateLimitError:

@@ -69,7 +69,7 @@ def _examples(entries):
     return random.sample(pool, k=min(FEW_SHOT, len(pool)))
 
 
-def generate(entries, theme="", base_url="", model="", n=1):
+def generate(entries, theme="", base_url="", model="", n=1, priority=()):
     """Return a list of up to n sentences."""
     allowed = "".join(known_characters(entries))
     if not allowed:
@@ -108,10 +108,10 @@ def generate(entries, theme="", base_url="", model="", n=1):
                     {"chinese": s["chinese"], "english": s["english"][0]} for s in examples
                 ]}, ensure_ascii=False)},
             ]
-        words = random.sample([e["text"] for e in entries], k=min(8 + n, len(entries)))
+        words = list(priority) or random.sample([e["text"] for e in entries], k=min(8 + n, len(entries)))
         request = (
             f"Write {n} new sentence{'s' if n > 1 else ''}, different from the previous ones. "
-            "Words you can use: " + "、".join(words)
+            "Use each of these words at least once: " + "、".join(words)
         )
         if theme:
             request += f". Topic: {theme}"
